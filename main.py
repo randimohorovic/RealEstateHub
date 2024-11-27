@@ -6,6 +6,16 @@ import base64
 
 app = FastAPI()
 
+#ovo mi omogućuje da front end radi na localhost:3000 i komunicira
+#sa backendom koji radi na http://localhost:8000/
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],  
+)
+
 #trenutne sesije u memoriji, treba sa dynamodb zamjenit ??
 sessions = {}
 
@@ -13,7 +23,7 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-#privremni data, treba baza spremit
+#privremni data cisto da vidim dali radi , treba baza spremit
 real_estate_listings = [
     {"id": 1, "name": "Apartman Pula", "price": 1200, "location": "Pula"},
     {"id": 2, "name": "Apartman Rovinj", "price": 850, "location": "Rovinj"},
