@@ -9,7 +9,7 @@
 **Sveučilište Jurja Dobrile u Puli**  
 **Fakultet informatike u Puli**
 
-Raspodijeljeni sustavi, ak.god. 2023./2024.
+Raspodijeljeni sustavi, ak.god. 2024./2025.
 
 **Mentor**: [Nikola Tanković](https://fipu.unipu.hr/fipu/nikola.tankovic)  
 Email: [nikola.tankovic@unipu.hr](mailto:nikola.tankovic@unipu.hr)
