@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uuid
 import base64
+import pandas as pd
+from scraper.scraper import scrape_real_estate_listings 
 
 app = FastAPI()
 
@@ -40,10 +42,21 @@ real_estate_listings = [
 #     raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @app.get("/listings")
-async def get_listings(): #(session_id: str)
+async def get_listings(url: str):
+    try:
+        listings = scrape_real_estate_listings(url)
+        return {"status": "success", "podaci": listings}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+#1#async def get_listings(): #(session_id: str)
     # hocu samo vratit podatke iz baze(trenutno iz lokalne) bez provjere sessiona
 
-    return{"status": "uspjesno", "podaci":real_estate_listings}
+    #1#return{"status": "uspjesno", "podaci":real_estate_listings}
     # if session_id not in sessions:
     #     raise HTTPException(status_code=401, detail="Unauthorized")
     # return {"listings": real_estate_listings}
+
+@app.get("/root")
+async def root():
+    return {"message": "Welcome to RealEstateHub API"}
+
