@@ -21,9 +21,6 @@ app.add_middleware(
 #trenutne sesije u memoriji, treba sa dynamodb zamjenit ??
 #sessions = {}
 
-# class LoginRequest(BaseModel):
-#     username: str
-#     password: str
 
 #privremni data cisto da vidim dali radi , treba baza spremit
 real_estate_listings = [
@@ -31,30 +28,13 @@ real_estate_listings = [
     {"id": 2, "name": "Apartman Rovinj", "price": 850, "location": "Rovinj"},
 ]
 
-#mislim da login necu ni imati zapravo
-# @app.post("/login")
-# async def login(login: LoginRequest):
-#     # login usera, ko sa nastave primejr samo da vidim da radi
-#     if login.username == "user" and login.password == "password":
-#         session_id = base64.b64encode(uuid.uuid4().bytes).decode("utf-8")
-#         sessions[session_id] = {"username": login.username}
-#         return {"status": "ok", "session_id": session_id}
-#     raise HTTPException(status_code=401, detail="Invalid credentials")
-
 @app.get("/listings")
-async def get_listings(url: str):
+async def get_listings(url: str, max_pages: int = 10):
     try:
-        listings = scrape_real_estate_listings(url)
-        return {"status": "success", "podaci": listings}
+        listings = scrape_real_estate_listings(url, max_pages=max_pages)
+        return  {"status": "success", "podaci": listings}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-#1#async def get_listings(): #(session_id: str)
-    # hocu samo vratit podatke iz baze(trenutno iz lokalne) bez provjere sessiona
-
-    #1#return{"status": "uspjesno", "podaci":real_estate_listings}
-    # if session_id not in sessions:
-    #     raise HTTPException(status_code=401, detail="Unauthorized")
-    # return {"listings": real_estate_listings}
 
 @app.get("/root")
 async def root():

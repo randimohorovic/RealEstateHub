@@ -1,8 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-# get request za testing
-#http://127.0.0.1:8000/listings?url=https://mondo-nekretnine.hr/hr/list?offer_type=&category=&location_id=&area_lo=&area_hi=&price_lo=&price_hi=&dist_center_hi=&dist_sea_hi=&orderby=price&orderdir=1&custom_id=
+
 def scrape_real_estate_listings(url: str, max_pages: int = 10, listings_per_page: int = 12):
     all_listings = []
     page = 1
