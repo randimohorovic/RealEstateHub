@@ -1,83 +1,97 @@
-// To do:
-// - dynamoDB bazu trebam dodat, zasad objave u lokalnoj meoriji radi sa frondendom
-// - vise scrapera za razlicite stranice
-// - filter objava
-// - Docker
-
 import React, { useState, useEffect } from "react";
 
 function App() {
   const [listings, setListings] = useState([]);
   const [message, setMessage] = useState("");
-  const [MaxPages, setMaxPages]= useState(1); //hocu imat da korisnik odabere koliko strnica da scrape-a
+  const [maxPages, setMaxPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {//test
-      fetch("http://localhost:8000/root")
-            .then((response) => response.json())
-            .then((data) => setMessage(data.message))
-            .catch((error) => console.error("Error fetching root:", error));
+  // pri pokretanju ako postoji neka greska
+  useEffect(() => {
+    fetch("http://localhost:8000/root")
+      .then((res) => res.json())
+      .then((data) => setMessage(data.message))
+      .catch(() => setError("Greška u povezivanju s backendom"));
   }, []);
-    // Mondo nekretnine Url:  http://127.0.0.1:8000/listings?url=https://mondo-nekretnine.hr/hr/list?offer_type=&category=&location_id=&area_lo=&area_hi=&price_lo=&price_hi=&dist_center_hi=&dist_sea_hi=&orderby=price&orderdir=1&custom_id=
-    // basic funkcija koja fetcha objave sa prosljedene stranice
-    const fetchListings = (url) => {
-      fetch(`${url}&max_pages=${MaxPages}`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("data:", data);
-          setListings(data.podaci); // dio objekta koji mi sadrzi podatke o listings
-        })
-        .catch((error) => {
-          console.error("Error fetching listings:", error);
-        });
-    };
+
+  // funkcija za dohvat podataka s Mondo Nekretnina
+  const fetchMondo = () => {
+    setLoading(true);
+    setError(null);
+
+    fetch(`http://localhost:8000/listings?url=https://mondo-nekretnine.hr/hr/list&max_pages=${maxPages}`)
+      .then((res) => res.json())
+      .then((data) => setListings(data.podaci || []))
+      .catch(() => setError("Greška kod dohvaćanja Mondo podataka"))
+      .finally(() => setLoading(false));
+  };
+
+  // funkcija za dohvat podataka s Njuskala
+  const fetchNjuskalo = () => {
+    setLoading(true);
+    setError(null);
+
+    fetch(`http://localhost:8000/njuskalo-listings?url=https://www.njuskalo.hr/prodaja-kuca&max_pages=${maxPages}`)
+      .then((res) => res.json())
+      .then((data) => setListings(data.podaci || []))
+      .catch(() => setError("Greška kod dohvaćanja Njuskalo podataka"))
+      .finally(() => setLoading(false));
+  };
 
   return (
     <div className="App">
       <h1>Real Estate Listings</h1>
-      <h1>{message}</h1>
+      {message && <h2>{message}</h2>}
+      {error && <div className="error">{error}</div>}
 
-      {/* div za MAX PAGE */}
-      <div>
-        <label htmlFor="max-pages">Koliko stranica zelis scrape-at: </label>
-        <input
-          type="number"
-          id="max-pages"
-          value={MaxPages}
-          onChange={(e) => setMaxPages(e.target.value)}
-          min="1"
-        />
+      <div className="controls">
+        <div>
+          <label htmlFor="max-pages">Broj stranica za scraping: </label>
+          <input
+            type="number"
+            id="max-pages"
+            value={maxPages}
+            onChange={(e) => setMaxPages(Math.max(1, parseInt(e.target.value) || 1))}
+            min="1"
+          />
+        </div>
+
+        <div className="buttons">
+          <button onClick={fetchMondo} disabled={loading}>
+            Mondo Nekretnine
+          </button>
+          <button onClick={fetchNjuskalo} disabled={loading}>
+            Njuskalo
+          </button>
+        </div>
       </div>
 
-      {/* div za buttons */}
-
-      <div>
-      <button onClick={() => fetchListings("http://127.0.0.1:8000/listings?url=https://mondo-nekretnine.hr/hr/list?offer_type=&category=&location_id=&area_lo=&area_hi=&price_lo=&price_hi=&dist_center_hi=&dist_sea_hi=&orderby=price&orderdir=1&custom_id=")}>
-      Mondo Nekretnine</button>
-
-      <button onClick={() => fetchListings("http://127.0.0.1:8000/listings?url=")}>
-        stranica druga
-</button>
-      </div>
-
-      {/* div za objave */}
-      {listings.length === 0 ? (
-        <p>ucitavanje...</p> 
-      ) : (
-      <ul>
-        {listings.map((listing, index) => (
-          <li key={listing.id ||index} >
-            <h2>{listing.title}</h2>
-             {/* Display image if URL is available */}
-             {listing.image_url ? (
-                <img src={listing.image_url} alt={listing.title} style={{ width: "200px", height: "auto" }} />
+      {loading ? (
+        <p>Učitavanje...</p>
+      ) : listings.length > 0 ? (
+        <div className="listings-grid">
+          {listings.map((listing, index) => (
+            <div key={listing.id || index} className="listing-card">
+              {listing.image_url ? (
+                <img
+                  src={listing.image_url}
+                  alt={listing.title}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
               ) : (
-                <p>Slika nije dostupna</p>
+                <div className="no-image">Nema slike</div>
               )}
-            <p>m2 and price: {listing.size_price}</p>
-            <p>Location: {listing.location}</p>
-          </li>
-        ))}
-      </ul>
+              <h3>{listing.title}</h3>
+              <div className="details">
+                <p>{listing.size_price}</p>
+                <p>{listing.location}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        !error && <p>Nema dostupnih oglasa</p>
       )}
     </div>
   );
