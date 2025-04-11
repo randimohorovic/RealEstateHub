@@ -10,7 +10,7 @@
 ```bash
    conda activate realestatehub 
 ```
-1. **Requirements.txt obavezno:**
+2. **Requirements.txt obavezno:**
 
 ```bash
    pip install -r requirements.txt
@@ -19,6 +19,7 @@
 ```bash
    uvicorn main:app --reload
 ```
+
 ```bash 
     #uvicorn main:app --reload (ako dode greska kao primjer ERROR:    [Errno 48] Address already in 
     #use onda --> lsof -i :8000 <-- (komanda prekida procese na toj adresi))
@@ -34,4 +35,12 @@ frontend:
 ```bash
     npm start
 ```
+
+
+### . Kreiraj `.env` datoteku
+
+Preimenuj `.env.example` i nazovi ga `.env`:
+
+
+### . Unesi svoje AWS podatke u `.env` # saljem preko maila
 
